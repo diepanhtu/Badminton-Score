@@ -212,7 +212,10 @@ body {
     flex: 1; max-width: 45%; justify-content: center;
 }
 .btn-icon {
-    width: 20px; height: 20px;
+    width: 20px !important; height: 20px !important; flex-shrink: 0;
+}
+.btn svg {
+    width: 20px; height: 20px; flex-shrink: 0;
 }
 .btn:hover { background: #444; }
 .btn:active { background: #555; transform: scale(0.98); }
