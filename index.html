@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Cầu Lông Scoreboard</title>
+    <!-- Basic PWA Manifest encoded as Data URI -->
+    <link rel="manifest"
+        href='data:application/manifest+json,{"name":"Cầu Lông Scoreboard","short_name":"Scoreboard","display":"standalone","background_color":"#000000","theme_color":"#000000","icons":[{"src":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48dGV4dCB5PSI4MCIgZm9udC1zaXplPSI4MCI+8J+PvjwvdGV4dD48L3N2Zz4=","sizes":"192x192","type":"image/svg+xml"}]}'>
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div id="status-bar"></div>
+
+    <div id="scoreboard">
+        <!-- Court Background Lines -->
+        <div id="court-lines">
+            <div class="c-line c-boundary"></div>
+            <div class="c-line c-net"></div>
+            <div class="c-line c-short-left"></div>
+            <div class="c-line c-short-right"></div>
+            <div class="c-line c-center-left"></div>
+            <div class="c-line c-center-right"></div>
+            <div class="c-line c-long-left"></div>
+            <div class="c-line c-long-right"></div>
+            <div class="c-line c-side-top"></div>
+            <div class="c-line c-side-bottom"></div>
+        </div>
+
+        <!-- Floating Switch Button on the net -->
+        <button id="btn-switch-court" onclick="switchSide(event)" title="Đổi Sân">
+            <svg viewBox="0 0 24 24">
+                <path d="M8,10V13H14V18H8V21L2,15.5L8,10M22,8.5L16,3V6H10V11H16V14L22,8.5Z" />
+            </svg>
+        </button>
+
+        <!-- Match Over Overlay (Shows when match ends) -->
+        <div id="match-over-overlay" style="display: none;">
+            <div class="winner-text" id="winner-text">Người chơi A Thắng!</div>
+            <button class="btn btn-primary" onclick="finalizeMatch(event)">Kết Thúc Trận Đấu</button>
+        </div>
+
+        <!-- Tour Complete Overlay (Shows when all 3 matches in a tour finish) -->
+        <div id="tour-complete-overlay" style="display:none;">
+            <canvas id="fireworks-canvas"></canvas>
+            <div class="tour-complete-content">
+                <div class="tour-complete-title" id="tour-complete-title">🏆 Chiến Thắng Vòng 1</div>
+                <div class="tour-trophy">
+                    <svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="cupGold" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+                                <stop offset="40%" style="stop-color:#FFF0A0;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#C8960C;stop-opacity:1" />
+                            </linearGradient>
+                            <linearGradient id="handleGold" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" style="stop-color:#C8960C" />
+                                <stop offset="50%" style="stop-color:#FFD700" />
+                                <stop offset="100%" style="stop-color:#C8960C" />
+                            </linearGradient>
+                        </defs>
+                        <!-- Cup body -->
+                        <path d="M28,10 L72,10 L65,65 Q50,75 35,65 Z" fill="url(#cupGold)" stroke="#A07000"
+                            stroke-width="1" />
+                        <!-- Cup handles -->
+                        <path d="M28,18 Q10,18 10,35 Q10,52 28,50" fill="none" stroke="url(#handleGold)"
+                            stroke-width="6" stroke-linecap="round" />
+                        <path d="M72,18 Q90,18 90,35 Q90,52 72,50" fill="none" stroke="url(#handleGold)"
+                            stroke-width="6" stroke-linecap="round" />
+                        <!-- Stem -->
+                        <rect x="44" y="65" width="12" height="25" fill="url(#cupGold)" stroke="#A07000"
+                            stroke-width="1" />
+                        <!-- Base -->
+                        <rect x="30" y="90" width="40" height="10" rx="3" fill="url(#cupGold)" stroke="#A07000"
+                            stroke-width="1" />
+                        <!-- Star on cup -->
+                        <text x="50" y="46" text-anchor="middle" font-size="22" fill="rgba(255,255,255,0.7)">★</text>
+                    </svg>
+                </div>
+                <div class="tour-complete-subtitle">Kết Thúc Vòng Đấu</div>
+                <button class="btn tour-complete-btn" onclick="closeTourComplete()">✅ Tiếp Tục</button>
+            </div>
+        </div>
+
+        <!-- PLAYER 1 PANE -->
+        <div class="pane pane-p1" id="pane1" onclick="addScore(1)">
+            <div class="serve-indicator serve-top" id="serve1-top">
+                <svg viewBox="0 0 24 24">
+                    <path
+                        d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12C4,14.6 5.25,16.9 7.19,18.36L16.22,9.33L14.67,7.78L12.92,9.53L12.22,8.82L13.97,7.07L12.56,5.65L10.8,7.4L10.1,6.7L11.85,4.95C11.9,4.95 11.95,4.95 12,4M19.19,7.63L10.15,16.66L11.7,18.21L13.45,16.46L14.16,17.17L12.41,18.92L13.82,20.33L15.57,18.58L16.28,19.29L14.53,21.04C16.95,20.69 18.96,19.04 19.85,16.89C20.64,15 20.33,12.78 19.19,7.63Z" />
+                </svg>
+            </div>
+            <div class="serve-indicator serve-bottom" id="serve1-bottom">
+                <svg viewBox="0 0 24 24">
+                    <path
+                        d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12C4,14.6 5.25,16.9 7.19,18.36L16.22,9.33L14.67,7.78L12.92,9.53L12.22,8.82L13.97,7.07L12.56,5.65L10.8,7.4L10.1,6.7L11.85,4.95C11.9,4.95 11.95,4.95 12,4M19.19,7.63L10.15,16.66L11.7,18.21L13.45,16.46L14.16,17.17L12.41,18.92L13.82,20.33L15.57,18.58L16.28,19.29L14.53,21.04C16.95,20.69 18.96,19.04 19.85,16.89C20.64,15 20.33,12.78 19.19,7.63Z" />
+                </svg>
+            </div>
+
+            <div class="player-name" id="name1" onclick="setServer(1, event)" title="Nhấn để đổi quyền giao cầu">Player
+                1</div>
+            <div class="score" id="score1">0</div>
+
+            <button class="btn-minus" onclick="subScore(1, event)">−</button>
+        </div>
+
+        <!-- PLAYER 2 PANE -->
+        <div class="pane pane-p2" id="pane2" onclick="addScore(2)">
+            <div class="serve-indicator serve-top" id="serve2-top">
+                <svg viewBox="0 0 24 24">
+                    <path
+                        d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12C4,14.6 5.25,16.9 7.19,18.36L16.22,9.33L14.67,7.78L12.92,9.53L12.22,8.82L13.97,7.07L12.56,5.65L10.8,7.4L10.1,6.7L11.85,4.95C11.9,4.95 11.95,4.95 12,4M19.19,7.63L10.15,16.66L11.7,18.21L13.45,16.46L14.16,17.17L12.41,18.92L13.82,20.33L15.57,18.58L16.28,19.29L14.53,21.04C16.95,20.69 18.96,19.04 19.85,16.89C20.64,15 20.33,12.78 19.19,7.63Z" />
+                </svg>
+            </div>
+            <div class="serve-indicator serve-bottom" id="serve2-bottom">
+                <svg viewBox="0 0 24 24">
+                    <path
+                        d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12C4,14.6 5.25,16.9 7.19,18.36L16.22,9.33L14.67,7.78L12.92,9.53L12.22,8.82L13.97,7.07L12.56,5.65L10.8,7.4L10.1,6.7L11.85,4.95C11.9,4.95 11.95,4.95 12,4M19.19,7.63L10.15,16.66L11.7,18.21L13.45,16.46L14.16,17.17L12.41,18.92L13.82,20.33L15.57,18.58L16.28,19.29L14.53,21.04C16.95,20.69 18.96,19.04 19.85,16.89C20.64,15 20.33,12.78 19.19,7.63Z" />
+                </svg>
+            </div>
+
+            <div class="player-name" id="name2" onclick="setServer(2, event)" title="Nhấn để đổi quyền giao cầu">Player
+                2</div>
+            <div class="score" id="score2">0</div>
+
+            <button class="btn-minus" onclick="subScore(2, event)">−</button>
+        </div>
+    </div>
+
+    <div id="controls">
+        <button class="btn" onclick="openDataModal()"><span>📊</span> Dữ liệu</button>
+        <button class="btn" onclick="openSettingsModal()"><span>⚙️</span> Cài đặt</button>
+    </div>
+
+    <!-- DATA MODAL (Dashboard) -->
+    <div id="data-modal" class="modal">
+        <div class="modal-content">
+            <h2>🏆 Bảng thành tích</h2>
+            <div id="dashboard-container" class="dashboard-grid"></div>
+
+            <div id="rotation-container" style="display:none;">
+                <h2>🔄 Lịch Xoay Tua</h2>
+                <div class="rotation-board" id="rotation-board">
+                    <!-- Rotation rows injected here -->
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-danger" onclick="resetAll()">Reset Dữ Liệu</button>
+                <button class="btn btn-finish" onclick="openFinalAwards()">🏅 Kết Thúc</button>
+                <button class="btn btn-primary" onclick="closeModal('data-modal')">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FINAL AWARDS OVERLAY -->
+    <div id="final-awards-overlay" style="display:none;">
+        <div class="awards-content">
+            <div class="awards-title">🏆 Bảng Xếp Hạng</div>
+            <div class="podium-row" id="podium-row">
+                <!-- Injected by JS: silver (left), gold (center), bronze (right) -->
+            </div>
+            <button class="btn awards-close-btn" onclick="closeFinalAwards()">✖ Đóng</button>
+        </div>
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <h2>Cài đặt Trận Đấu</h2>
+            <div class="form-group">
+                <label>Chế độ chơi (Nhấn đổi sẽ làm mới kết quả hiện tại)</label>
+                <select id="mode-select" onchange="changeMode(this.value)">
+                    <option value="rotation">Chế độ 2: Xoay tua 3 người (A-B-C)</option>
+                    <option value="singles">Chế độ 1: Đánh Đơn</option>
+                    <option value="doubles">Chế độ 3: Đánh Đôi</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Điểm thắng (Mặc định: 21)</label>
+                <input type="number" id="win-score-input" value="21" onchange="updateWinScore(this.value)">
+            </div>
+
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="win-by-two" onchange="updateWinByTwo(this.checked)">
+                    Cần cách biệt 2 điểm (Deuce - cap ở 30)
+                </label>
+            </div>
+
+            <div id="names-container"></div>
+
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="closeModal('settings-modal')">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LÔGIC APP (JAVASCRIPT) -->
+    <script src="script.js"></script>
+</body>
+
+</html>
