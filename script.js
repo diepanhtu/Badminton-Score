@@ -137,16 +137,7 @@ function render() {
         }
     }
 
-    // Status bar info
-    let bar = document.getElementById('status-bar');
-    if (state.mode === 'rotation') {
-        let rest = state.players[state.match.restingId];
-        let tNum = state.tours.length;
-        bar.innerHTML = `Đang đánh: ${p1.name} (${p1.matchesPlayed} trận) vs ${p2.name} (${p2.matchesPlayed} trận)<br/>Nghỉ: ${rest.name} | Tua: ${tNum}`;
-    } else {
-        let txt = state.mode === 'singles' ? 'Chế độ Đơn' : 'Chế độ Đôi';
-        bar.innerHTML = `${txt}: ${p1.name} (${p1.wins} thắng) - ${p2.name} (${p2.wins} thắng)`;
-    }
+
     // Manage Match Over Overlay and Switch Button
     let overlay = document.getElementById('match-over-overlay');
     let btnSwitch = document.getElementById('btn-switch-court');

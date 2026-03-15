@@ -211,6 +211,9 @@ body {
     cursor: pointer; display: flex; align-items: center; gap: 8px;
     flex: 1; max-width: 45%; justify-content: center;
 }
+.btn-icon {
+    width: 20px; height: 20px;
+}
 .btn:hover { background: #444; }
 .btn:active { background: #555; transform: scale(0.98); }
 .btn-primary { background: #4A90E2; }
