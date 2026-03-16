@@ -890,7 +890,7 @@ function openFinalAwards() {
     closeModal('data-modal');
     let overlay = document.getElementById('final-awards-overlay');
     let podiumRow = document.getElementById('podium-row');
-    
+
     // Calculate rankings
     let players = [];
     if (state.mode === 'rotation') {
@@ -902,7 +902,7 @@ function openFinalAwards() {
     }
 
     // Sort by wins (desc), then point diff (desc)
-    players.sort((a,b) => (b.wins - a.wins) || ((b.pointDiff || 0) - (a.pointDiff || 0)));
+    players.sort((a, b) => (b.wins - a.wins) || ((b.pointDiff || 0) - (a.pointDiff || 0)));
 
     // Generate SVG for trophies with specific colors
     const getTrophySVG = (color1, color2, color3) => `
@@ -941,7 +941,7 @@ function openFinalAwards() {
         let tColors = trophyColors[index];
         let losses = p.matchesPlayed - p.wins;
         if (state.mode !== 'rotation') losses = '?'; // non-rotation modes don't strictly track losses the same way, but let's just show basic stats
-        
+
         // Build stats block
         let statsHtml = `<span>Thắng: ${p.wins}</span><br>`;
         if (state.mode === 'rotation') {
@@ -964,7 +964,7 @@ function openFinalAwards() {
 
     podiumRow.innerHTML = html;
     overlay.style.display = 'flex';
-    
+
     // Reuse the fireworks from the tour completion!
     startFireworks();
 }
