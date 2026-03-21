@@ -260,43 +260,7 @@ function randomizeFirstMatch() {
 }
 
 function startNewTour() {
-    // Determine the starting rotation for the new tour.
-    // The cycle must be: Match1(X vs Y, Z rests) → Match2(Y vs Z, X rests) → Match3(Z vs X, Y rests)
-    // To achieve this for each new tour, we rotate the starting trio so that:
-    //   - The player who RESTED last in the previous tour plays first in the new tour
-    //   - The players who played last shift: previous resting player joins, previous winner rests
-    // Simplest correct approach: rotate the (p1, p2, rest) triple by one position each new tour.
-    // After the last match of the previous tour, state.match already holds the NEXT queued match.
-    // We want to start fresh with a clean rotation based on who rested last.
-
-    let lastTour = state.tours[state.tours.length - 1];
-    if (lastTour.length >= 3) {
-        // The last match recorded in the previous tour
-        let lastMatch = lastTour[lastTour.length - 1]; // { p1, p2, r, winner }
-
-        // For the new tour, start the cycle from the player who rested last.
-        // New tour: Match1 -> prevResting vs prevLoser (prevWinner rests)
-        let prevWinner = lastMatch.winner;
-        let prevResting = lastMatch.r;
-        let prevLoser = (lastMatch.p1 === prevWinner) ? lastMatch.p2 : lastMatch.p1;
-
-        state.match.p1Id = prevResting;
-        state.match.p2Id = prevLoser;
-        state.match.restingId = prevWinner;
-    }
-
-    // Reset match state for new tour
-    state.match.p1Score = 0;
-    state.match.p2Score = 0;
-    state.match.server = 1;
-    state.match.switchedSides = false;
-    state.match.isFinished = false;
-    state.match.winnerIndex = null;
-
-    // Reset consecutiveWins for fresh tour
-    ['A', 'B', 'C'].forEach(id => state.players[id].consecutiveWins = 0);
-
-    state.tours.push([]); // Add empty tour
+    state.tours.push([]); // Add empty tour, matching logic correctly rolls over from the previous tour
     saveState();
     render();
     renderDashboard();
@@ -538,7 +502,7 @@ function renderRotationBoard() {
 
         // Add Randomize or + New Tour buttons on the LAST tour only
         if (isLastTour) {
-            if (tourData.length === 0 && state.match.p1Score === 0 && state.match.p2Score === 0) {
+            if (tourIndex === 0 && tourData.length === 0 && state.match.p1Score === 0 && state.match.p2Score === 0) {
                 // Feature: Randomize first matchup only if literally no points/matches played in THIS tour
                 html += `<div style="text-align:center; margin-top:20px;">
                             <button class="btn" style="background:#8E44AD; margin:0 auto; padding:8px 16px; font-size:14px;" onclick="randomizeFirstMatch()">🎲 Bốc Thăm Ngẫu Nhiên Cặp Đấu Mở Màn</button>
