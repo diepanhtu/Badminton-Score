@@ -490,7 +490,7 @@ body {
     width: 100%;
     max-width: 800px;
     /* Enlarged modal width */
-    max-height: 90vh;
+    max-height: 90%;
     overflow-y: auto;
     border: 1px solid #444;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
