@@ -5,9 +5,9 @@ const defaultState = {
     winningScore: 21,
     winByTwo: true,
     players: {
-        A: { id: 'A', name: 'Người chơi A', wins: 0, pointsScored: 0, pointDiff: 0, matchesPlayed: 0, consecutiveWins: 0, hasRested: false },
-        B: { id: 'B', name: 'Người chơi B', wins: 0, pointsScored: 0, pointDiff: 0, matchesPlayed: 0, consecutiveWins: 0, hasRested: false },
-        C: { id: 'C', name: 'Người chơi C', wins: 0, pointsScored: 0, pointDiff: 0, matchesPlayed: 0, consecutiveWins: 0, hasRested: true } // Initially resting
+        A: { id: 'A', name: 'Người chơi A', wins: 0, pointsScored: 0, pointDiff: 0, matchesPlayed: 0, consecutiveWins: 0, consecutiveMatches: 0, hasRested: false },
+        B: { id: 'B', name: 'Người chơi B', wins: 0, pointsScored: 0, pointDiff: 0, matchesPlayed: 0, consecutiveWins: 0, consecutiveMatches: 0, hasRested: false },
+        C: { id: 'C', name: 'Người chơi C', wins: 0, pointsScored: 0, pointDiff: 0, matchesPlayed: 0, consecutiveWins: 0, consecutiveMatches: 0, hasRested: true } // Initially resting
     },
     singles: {
         p1: { id: 'p1', name: 'Người chơi 1', wins: 0 },
@@ -52,6 +52,12 @@ if (state.players && state.players.A.consecutiveWins === undefined) {
     state.players.A.consecutiveWins = 0;
     state.players.B.consecutiveWins = 0;
     state.players.C.consecutiveWins = 0;
+}
+
+if (state.players && state.players.A.consecutiveMatches === undefined) {
+    state.players.A.consecutiveMatches = 0;
+    state.players.B.consecutiveMatches = 0;
+    state.players.C.consecutiveMatches = 0;
 }
 
 function saveState() {
@@ -298,6 +304,10 @@ function finalizeMatch(e) {
         loserState.consecutiveWins = 0;
         restingState.consecutiveWins = 0;
 
+        winnerState.consecutiveMatches = (winnerState.consecutiveMatches || 0) + 1;
+        loserState.consecutiveMatches = (loserState.consecutiveMatches || 0) + 1;
+        restingState.consecutiveMatches = 0;
+
         let activeTour = state.tours[state.tours.length - 1];
 
         // Save this completed match into the tour history
@@ -308,16 +318,20 @@ function finalizeMatch(e) {
             winner: wId
         });
 
-        // Rotation Logic: Max 2 continuous game wins
+        // Rotation Logic: Max 2 continuous matches played
         let nextP1, nextP2, nextR;
-        if (winnerState.consecutiveWins >= 2) {
-            // Winner must yield -> Loser stays on vs Resting
-            winnerState.consecutiveWins = 0;
+        if (winnerState.consecutiveMatches >= 2) {
+            // Winner has played 2 matches -> Winner must rest
             nextR = wId;
             nextP1 = lId;
             nextP2 = state.match.restingId;
+        } else if (loserState.consecutiveMatches >= 2) {
+            // Loser has played 2 matches -> Loser must rest 
+            nextR = lId;
+            nextP1 = wId;
+            nextP2 = state.match.restingId;
         } else {
-            // Normal rule: Loser rests -> Winner stays on vs Resting
+            // Neither has played 2 matches -> Normal rule: Loser rests
             nextR = lId;
             nextP1 = wId;
             nextP2 = state.match.restingId;
@@ -577,7 +591,10 @@ function changeMode(newMode) {
     state.tours = [[]]; // Reset tour
 
     if (state.players) {
-        ['A', 'B', 'C'].forEach(id => state.players[id].consecutiveWins = 0);
+        ['A', 'B', 'C'].forEach(id => {
+            state.players[id].consecutiveWins = 0;
+            state.players[id].consecutiveMatches = 0;
+        });
     }
 
     if (newMode === 'rotation') {
@@ -621,9 +638,9 @@ function resetAll() {
 
     // Zero out all player stats
     state.players = {
-        A: { id: 'A', name: nameA, wins: 0, pointsScored: 0, pointDiff: 0, matchesPlayed: 0, consecutiveWins: 0, hasRested: false },
-        B: { id: 'B', name: nameB, wins: 0, pointsScored: 0, pointDiff: 0, matchesPlayed: 0, consecutiveWins: 0, hasRested: false },
-        C: { id: 'C', name: nameC, wins: 0, pointsScored: 0, pointDiff: 0, matchesPlayed: 0, consecutiveWins: 0, hasRested: true }
+        A: { id: 'A', name: nameA, wins: 0, pointsScored: 0, pointDiff: 0, matchesPlayed: 0, consecutiveWins: 0, consecutiveMatches: 0, hasRested: false },
+        B: { id: 'B', name: nameB, wins: 0, pointsScored: 0, pointDiff: 0, matchesPlayed: 0, consecutiveWins: 0, consecutiveMatches: 0, hasRested: false },
+        C: { id: 'C', name: nameC, wins: 0, pointsScored: 0, pointDiff: 0, matchesPlayed: 0, consecutiveWins: 0, consecutiveMatches: 0, hasRested: true }
     };
     state.singles = {
         p1: { id: 'p1', name: nameP1, wins: 0 },
